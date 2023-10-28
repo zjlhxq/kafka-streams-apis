@@ -1,8 +1,5 @@
 package com.abhirockzz;
 
-import com.abhirockzz.App;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KeyValue;
@@ -12,13 +9,12 @@ import org.apache.kafka.streams.TestOutputTopic;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.TopologyTestDriver;
 import org.apache.kafka.streams.state.KeyValueStore;
-import static org.hamcrest.CoreMatchers.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 /**
  *
@@ -42,7 +38,7 @@ public class AppTest {
         config.setProperty(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         td.close();
     }
@@ -56,14 +52,14 @@ public class AppTest {
         inputTopic = td.createInputTopic(App.INPUT_TOPIC, Serdes.String().serializer(), Serdes.String().serializer());
         outputTopic = td.createOutputTopic(App.OUTPUT_TOPIC, Serdes.String().deserializer(), Serdes.String().deserializer());
 
-        assertThat(outputTopic.isEmpty(), is(true));
+        assertTrue(outputTopic.isEmpty());
 
         inputTopic.pipeInput("foo", "barrrrr");
-        assertThat(outputTopic.readValue(), equalTo("barrrrr"));
-        assertThat(outputTopic.isEmpty(), is(true));
+        assertEquals(outputTopic.readValue(), "barrrrr");
+        assertTrue(outputTopic.isEmpty());
 
         inputTopic.pipeInput("foo", "bar");
-        assertThat(outputTopic.isEmpty(), is(true));
+        assertTrue(outputTopic.isEmpty());
     }
 
     @Test
@@ -78,18 +74,18 @@ public class AppTest {
         inputTopic.pipeInput("hello", "world,universe");
         inputTopic.pipeInput("hi", "there");
 
-        assertThat(outputTopic.getQueueSize(), equalTo(6L));
+        assertEquals(outputTopic.getQueueSize(), 6L);
 
-        assertThat(outputTopic.readKeyValue(), equalTo(new KeyValue<>("random", "foo")));
-        assertThat(outputTopic.readKeyValue(), equalTo(new KeyValue<>("random", "bar")));
-        assertThat(outputTopic.readKeyValue(), equalTo(new KeyValue<>("random", "baz")));
+        assertEquals(outputTopic.readKeyValue(), new KeyValue<>("random", "foo"));
+        assertEquals(outputTopic.readKeyValue(), new KeyValue<>("random", "bar"));
+        assertEquals(outputTopic.readKeyValue(), new KeyValue<>("random", "baz"));
 
-        assertThat(outputTopic.readKeyValue(), equalTo(new KeyValue<>("hello", "world")));
-        assertThat(outputTopic.readKeyValue(), equalTo(new KeyValue<>("hello", "universe")));
+        assertEquals(outputTopic.readKeyValue(), new KeyValue<>("hello", "world"));
+        assertEquals(outputTopic.readKeyValue(), new KeyValue<>("hello", "universe"));
 
-        assertThat(outputTopic.readKeyValue(), equalTo(new KeyValue<>("hi", "there")));
+        assertEquals(outputTopic.readKeyValue(), new KeyValue<>("hi", "there"));
 
-        assertThat(outputTopic.isEmpty(), is(true));
+        assertTrue(outputTopic.isEmpty());
     }
 
     @Test
@@ -106,13 +102,13 @@ public class AppTest {
         inputTopic.pipeInput("key3", "value4");
         inputTopic.pipeInput("key2", "value5");
 
-        assertThat(ot.readKeyValue(), equalTo(new KeyValue<String, Long>("key1", 1L)));
-        assertThat(ot.readKeyValue(), equalTo(new KeyValue<String, Long>("key1", 2L)));
-        assertThat(ot.readKeyValue(), equalTo(new KeyValue<String, Long>("key2", 1L)));
-        assertThat(ot.readKeyValue(), equalTo(new KeyValue<String, Long>("key3", 1L)));
-        assertThat(ot.readKeyValue(), equalTo(new KeyValue<String, Long>("key2", 2L)));
+        assertEquals(ot.readKeyValue(), new KeyValue<String, Long>("key1", 1L));
+        assertEquals(ot.readKeyValue(), new KeyValue<String, Long>("key1", 2L));
+        assertEquals(ot.readKeyValue(), new KeyValue<String, Long>("key2", 1L));
+        assertEquals(ot.readKeyValue(), new KeyValue<String, Long>("key3", 1L));
+        assertEquals(ot.readKeyValue(), new KeyValue<String, Long>("key2", 2L));
 
-        assertThat(ot.isEmpty(), is(true));
+        assertTrue(ot.isEmpty());
     }
 
     @Test
@@ -125,18 +121,18 @@ public class AppTest {
         KeyValueStore<String, Long> countStore = td.getKeyValueStore("count-store");
 
         inputTopic.pipeInput("key1", "value1");
-        assertThat(countStore.get("key1"), equalTo(1L));
+        assertEquals(countStore.get("key1"), 1L);
 
         inputTopic.pipeInput("key1", "value2");
-        assertThat(countStore.get("key1"), equalTo(2L));
+        assertEquals(countStore.get("key1"), 2L);
 
         inputTopic.pipeInput("key2", "value3");
-        assertThat(countStore.get("key2"), equalTo(1L));
+        assertEquals(countStore.get("key2"), 1L);
 
         inputTopic.pipeInput("key3", "value4");
-        assertThat(countStore.get("key3"), equalTo(1L));
+        assertEquals(countStore.get("key3"), 1L);
 
         inputTopic.pipeInput("key2", "value5");
-        assertThat(countStore.get("key2"), equalTo(2L));
+        assertEquals(countStore.get("key2"), 2L);
     }
 }

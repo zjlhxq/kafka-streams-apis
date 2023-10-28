@@ -9,11 +9,13 @@ import org.apache.kafka.streams.TestInputTopic;
 import org.apache.kafka.streams.TestOutputTopic;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.TopologyTestDriver;
-import static org.hamcrest.CoreMatchers.*;
 
-import org.junit.After;
-import org.junit.Test;
-import static org.junit.Assert.*;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  *
@@ -35,7 +37,7 @@ public class AppTest {
         config.setProperty(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         td.close();
     }
@@ -50,21 +52,21 @@ public class AppTest {
         TestOutputTopic<String, Integer> outputTopic = td.createOutputTopic(App.OUTPUT_TOPIC, Serdes.String().deserializer(), Serdes.Integer().deserializer());
 
         inputTopic.pipeInput("key1", "value1");
-        assertThat(outputTopic.readKeyValue(), equalTo(new KeyValue<String, Integer>("key1", 1)));
+        assertEquals(outputTopic.readKeyValue(), new KeyValue<String, Integer>("key1", 1));
 
         inputTopic.pipeInput("key1", "value2");
-        assertThat(outputTopic.readKeyValue(), equalTo(new KeyValue<String, Integer>("key1", 2)));
+        assertEquals(outputTopic.readKeyValue(), new KeyValue<String, Integer>("key1", 2));
 
         inputTopic.pipeInput("key2", "value3");
-        assertThat(outputTopic.readKeyValue(), equalTo(new KeyValue<String, Integer>("key2", 1)));
+        assertEquals(outputTopic.readKeyValue(), new KeyValue<String, Integer>("key2", 1));
 
         inputTopic.pipeInput("key3", "value4");
-        assertThat(outputTopic.readKeyValue(), equalTo(new KeyValue<String, Integer>("key3", 1)));
+        assertEquals(outputTopic.readKeyValue(), new KeyValue<String, Integer>("key3", 1));
 
         inputTopic.pipeInput("key2", "value5");
-        assertThat(outputTopic.readKeyValue(), equalTo(new KeyValue<String, Integer>("key2", 2)));
+        assertEquals(outputTopic.readKeyValue(), new KeyValue<String, Integer>("key2", 2));
 
-        assertThat(outputTopic.isEmpty(), is(true));
+        assertTrue(outputTopic.isEmpty());
     }
 
     @Test
@@ -80,21 +82,21 @@ public class AppTest {
         String key = "product1";
         
         inputTopic.pipeInput(key, 5L);
-        assertThat(outputTopic.readValue(), equalTo(5L));
+        assertEquals(outputTopic.readValue(), 5L);
 
         inputTopic.pipeInput(key, 6L);
-        assertThat(outputTopic.readValue(), equalTo(6L));
+        assertEquals(outputTopic.readValue(), 6L);
 
         inputTopic.pipeInput(key, 10L);
-        assertThat(outputTopic.readValue(), equalTo(10L));
+        assertEquals(outputTopic.readValue(), 10L);
 
         inputTopic.pipeInput(key, 2L);
-        assertThat(outputTopic.readValue(), equalTo(10L));
+        assertEquals(outputTopic.readValue(), 10L);
 
         inputTopic.pipeInput(key, 5L);
-        assertThat(outputTopic.readValue(), equalTo(10L));
+        assertEquals(outputTopic.readValue(), 10L);
 
-        assertThat(outputTopic.isEmpty(), is(true));
+        assertTrue(outputTopic.isEmpty());
 
     }
 }
